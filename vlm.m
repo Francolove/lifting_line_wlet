@@ -6,8 +6,8 @@ naca = 4412;
 wing_root = 1;
 wing_tip = 1;
 wing_span = 10;
-n_chord = 20;
-n_span = 50;
+n_chord = 10;
+n_span = 10;
 wing_sweep = deg2rad(0);
 wing_twist = deg2rad(0);
 

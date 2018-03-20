@@ -1,5 +1,5 @@
 function V = induced_speed(u_vortex, point, dir, gamma)
-% calcola la velocità indotta da un vortice a ferro di cavallo (che può non
+% calcola la velocitï¿½ indotta da un vortice a ferro di cavallo (che puï¿½ non
 % essere per forza "rettilineo" i.e.(segue la curvatura della corda)
 
     % tratto di aperura
@@ -20,7 +20,7 @@ function V = induced_speed(u_vortex, point, dir, gamma)
     % tratto_semiinfinito
     p_inf = [u_vortex(end,1,:); u_vortex(end,2,:)];
     
-    gamma_inf = gamma*[1; -1]; % uno dei due deve essere opposto al primo
+    gamma_inf = gamma*[1;-1]; % uno dei due deve essere opposto al primo
     
     V_inf = induced_semiinf_speed(p_inf,point ,dir,gamma_inf);
     

@@ -19,7 +19,7 @@ function [A,b,V] = influence(vortex,point,dir,N,gamma)
             V = V+dummy;
             dummyA = dot(dummy,repmat(N(i,j,:),size(dummy,1),...
                                                        size(dummy,2),1),3);
-            dummyA = reshape(dummy,1,numel(dummy));
+            dummyA = reshape(dummyA,1,numel(dummyA));
             A = [A;dummyA];
             b = [b;-dot(N(i,j,:),dir)];
         end
