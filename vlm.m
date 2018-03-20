@@ -3,39 +3,39 @@ clear all
 close all
 
 naca = 4412;
-wing_root = 1;
+wing_root = 4;
 wing_tip = 1;
 wing_span = 10;
 n_chord = 10;
-n_span = 10;
+n_span = 30;
 wing_sweep = deg2rad(0);
 wing_twist = deg2rad(0);
 
 % winglet
 w_let_root = wing_tip;
-w_let_tip = .1;
+w_let_tip = .2;
 height = 2;
-Radius = 1;
-n_height = 20;
-cant = deg2rad(0);
-sweep = deg2rad(15);
-toe_out = deg2rad(-20);
+Radius = .5;
+n_height = 80;
+cant = deg2rad(60);
+sweep = deg2rad(35);
+toe_out = deg2rad(0);
 up = 1; % 1 --> winglet verso l'alto
          % -1 --> winglet verso il basso
          
 V_inf = zeros(n_chord-1,n_span-1,3);
 V_inf(:,:,1) = -1;
-V_inf(:,:,3) = 0;
+V_inf(:,:,3) = -0.1;
          
 %% code
 Wing = build_wing(wing_root,wing_tip,wing_span,n_chord,n_span,naca,...
                                                     wing_sweep,wing_twist);
-
+% 
 % W_let = build_winglet(w_let_root,w_let_tip,height,Radius,n_chord,...
 %                     n_height,cant,sweep,toe_out,naca,Wing,wing_twist,up);
 % V_inf = zeros(n_chord-1,n_span-1+n_height-1,3);
-% V_inf(:,:,1) = 1;
-% V_inf(:,:,3) = .1;
+% V_inf(:,:,1) = -1;
+% V_inf(:,:,3) = -.1;
 % Wing = assemble_wing(Wing,W_let);                                                
 
 [vortex,p_controllo] = collocazione(Wing);
@@ -56,22 +56,28 @@ Wing = build_wing(wing_root,wing_tip,wing_span,n_chord,n_span,naca,...
 %                                           T(:,:,1),T(:,:,2),T(:,:,3),'y')
 
 %% risoluzione sistema lineare
+% tic
+% [At,bt] = influence(vortex,p_controllo,V_inf(1,1,:),N,1);
+% toc
 tic
-[A,b] = influence(vortex,p_controllo,V_inf(1,1,:),N,1);
+A = induced(vortex,1,p_controllo,V_inf(1,1,:),N);
+B = -dot(V_inf,N,3)';
+b = B(:);
 toc
 %%
-gamma = A\b;
-gamma = reshape(gamma,size(p_controllo,1),size(p_controllo,2));
-surf(Wing(:,:,1),Wing(:,:,2),Wing(:,:,3),gamma)
-xlabel('chord')
-ylabel('span')
-axis equal
-colorbar
-%%
-[~,~,V]=influence(vortex,p_controllo,V_inf(1,1,:),N,gamma);
-
-cp = 1-(sqrt(sum((V+V_inf).^2,3)).^2./sqrt(sum(V_inf.^2,3))).^2;
+gamma_ll = A\b;
+gamma_ll = reshape(gamma_ll,size(p_controllo,1),size(p_controllo,2));
+% surf(Wing(:,:,1),Wing(:,:,2),Wing(:,:,3),gamma_ll)
+% % surf(gamma_ll')
+% axis equal
+% xlabel('chord')
+% ylabel('span')
+% colorbar
+%
+V = induced(vortex,gamma_ll,p_controllo,V_inf(1,1,:),N);
+cp = -2*V(:,:,1)./sqrt(sum(V_inf(1,1,:)).^2);
 figure(400)
 surf(p_controllo(:,:,1),p_controllo(:,:,2),p_controllo(:,:,3),cp)
+shading interp
 axis equal
 colorbar
