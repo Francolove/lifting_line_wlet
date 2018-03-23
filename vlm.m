@@ -3,7 +3,7 @@ clear all
 close all
 
 naca = 4412;
-wing_root = 4;
+wing_root = 1;
 wing_tip = 1;
 wing_span = 10;
 n_chord = 10;
@@ -74,7 +74,9 @@ gamma_ll = reshape(gamma_ll,size(p_controllo,1),size(p_controllo,2));
 % ylabel('span')
 % colorbar
 %
+tic
 V = induced(vortex,gamma_ll,p_controllo,V_inf(1,1,:),N);
+toc
 cp = -2*V(:,:,1)./sqrt(sum(V_inf(1,1,:)).^2);
 figure(400)
 surf(p_controllo(:,:,1),p_controllo(:,:,2),p_controllo(:,:,3),cp)
