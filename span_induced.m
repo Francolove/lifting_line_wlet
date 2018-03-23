@@ -47,7 +47,7 @@ function VV = span_induced(vortex,gamma,point)
     % viscoso) che serve per "simulare" l'effetto del core allontanado il
     % punto in modo artificiale
     
-    k = 0; 1e-3; %parametro modificabile
+    k = 0; %parametro modificabile
     % sviluppato analiticamente per ottenere una forma di più facile
     % implementazione numerica
     if k~=0
