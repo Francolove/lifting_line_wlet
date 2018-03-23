@@ -9,7 +9,7 @@ wing_span = 10;
 n_chord = 50;
 n_span = 30;
 wing_sweep = deg2rad(0);
-wing_twist = deg2rad(5);
+wing_twist = deg2rad(0);
 
 % winglet
 w_let_root = wing_tip;
@@ -31,8 +31,8 @@ Wing = build_wing(wing_root,wing_tip,wing_span,n_chord,n_span,naca,...
 % W_let = build_winglet(w_let_root,w_let_tip,height,Radius,n_chord,...
 %                     n_height,cant,sweep,toe_out,naca,Wing,wing_twist,up);
 %  Wing = assemble_wing(Wing,W_let); 
- Wing2 = Wing; Wing2(:,:,2) = - Wing(:,:,2);
- Wing = assemble_wing(Wing2(:,end:-1:1,:),Wing);                                                
+%  Wing2 = Wing; Wing2(:,:,2) = - Wing(:,:,2);
+%  Wing = assemble_wing(Wing2(:,end:-1:1,:),Wing);                                                
 
 [vortex,p_controllo] = collocazione(Wing);
 [N,T] = versori(Wing);
