@@ -1,4 +1,4 @@
-function V = induced(vortex,gamma,points,dir,N)
+function [V,coeffxcd] = induced(vortex,gamma,points,dir,N)
 % calcola la velocità indotta da una griglia di vortici a staffa descritta
 % dai punti contenuti in vortex(m,n,3) aventi intensità gamma(m-1,n-1)
 % nei punti points(k,l,3) 
@@ -24,7 +24,7 @@ function V = induced(vortex,gamma,points,dir,N)
             % velcotià indotta dagli spanwise
             vs = span_induced(vortex,gamma,points(i,j,:));
             % velocità indotta dai chordwise
-            vc = chord_induced(vortex,gamma,points(i,j,:),dir);
+            [vc,v_ind] = chord_induced(vortex,gamma,points(i,j,:),dir);
 
             if numel(gamma)==1 % voglio una matrice 2D delle velocità normali
 
@@ -33,8 +33,10 @@ function V = induced(vortex,gamma,points,dir,N)
                 V((i-1)*pp+j,:) = dot(dummy,repmat(N(i,j,:), ...
                                                    1,size(dummy,2),1),3);
         
+                coeffxcd(i,j) = NaN;
             else % volgio una matrice 3D di velocità indotte
-                
+                Nxcd = dir; Nxcd(:,:,1) = -dir(:,:,3); Nxcd(:,:,3) = dir(:,:,1);
+                coeffxcd(i,j) = dot(v_ind,N(i,j,:),3);
                 V(i,j,:) = vs+vc;
             end
             

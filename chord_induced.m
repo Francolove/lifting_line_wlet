@@ -1,4 +1,4 @@
-function VV = chord_induced(vortex,gamma,point,dir)
+function [VV,V_ind] = chord_induced(vortex,gamma,point,dir)
 % calcola la velocità indotta dai segmenti allineati alla linea media del
 % profilo dei vortici a staffa descritti dalla matrice 3d di punti
 % vortex(m,n,3) aventi intensità gamma nel punto point(1,1,3)
@@ -18,7 +18,7 @@ function VV = chord_induced(vortex,gamma,point,dir)
         % corrispondente
         % per ogni riga di vortex il segmento j-esimo avra intensità pari a
         %  gamma_i - gamma_(i+1) dove i è l'indice dei vortici ad anello
-        gamma_c = gamma; gamma_c(:,2:end) = gamma(:,1:end-1)-gamma(:,2:end);
+        gamma_c = gamma; gamma_c(:,2:end) = -gamma(:,1:end-1)+gamma(:,2:end);
         gamma_c(:,end+1) = gamma(:,end); % numel(segmenti_riga) = numel(vortici_riga)+1
         
         % per ogni colonna il segmento j-esimo avra
@@ -139,9 +139,17 @@ function VV = chord_induced(vortex,gamma,point,dir)
        VV_bu = repmat(VV_bu,size(vortex,1)-1,1,1);
        
        VV = VV+VV_bu;
-       
+       V_ind = NaN; 
     else % restituisco la velocità indotta dai segmenti chordwise
-       VV = sum(V,1) + sum(V_bu,1);
+%         VV = sum(V,1) + sum(V_bu,1);
+        V = reshape(V,size(vortex,1)-1,size(vortex,2),3);
+        VV = ricostruzione_ind_vortice(V);               
+        % riporto v_bu in riga (non posso usare il trasposto perchè è 3D          147
+        V_bu = reshape(V_bu,1,size(vortex,2),3);         
+        VV_bu = ricostruzione_ind_vortice(V_bu);         
+        VV_bu = repmat(VV_bu,size(vortex,1)-1,1,1);
+        VV = sum(sum(VV,1),2) + sum(sum(VV_bu,1),2); 
+        V_ind = sum(sum(VV_bu,1),2);
     end
     
 end
@@ -155,10 +163,10 @@ function VV = ricostruzione_ind_vortice(V)
         % primo vortice ad anello, tutte le righe prima e seconda colonna
         % è l'unico ad essere gia giusto qunidi sommo il filamento di 
         % sinistra e sottraggo quello di destra
-        VV(i,1,:) = +sum(V(i:end,1,:),1) - sum(V(i:end,2,:),1);
+        VV(i,:,:) = +sum(V(i:end,1:end-1,:),1) - sum(V(i:end,2:end,:),1);
         % tutti gli altri sono presi al contrario quindi sommo il vortice
         % di sinistra e sottraggo quello di destra
-        VV(i,2:size(V,2)-1,:) = -sum(V(i:end,3:end,:),1) + ...
-                                                 sum(V(i:end,2:end-1,:),1);
+%         VV(i,2:size(V,2)-1,:) = -sum(V(i:end,3:end,:),1) + ...
+%                                                  sum(V(i:end,2:end-1,:),1);
     end
 end

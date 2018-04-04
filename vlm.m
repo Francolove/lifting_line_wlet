@@ -1,25 +1,25 @@
 %% ala
 clear all
-close all
 
-naca = 2312;
+naca = 0012;
 wing_root = 1;
 wing_tip = 1;
-wing_span = 10;
-n_chord = 50;
-n_span = 30;
+wing_span = 5;
+n_chord = 2;
+n_span = 21;
 wing_sweep = deg2rad(0);
 wing_twist = deg2rad(0);
 
+
 % winglet
 w_let_root = wing_tip;
-w_let_tip = .75;
+w_let_tip = 1;
 height = 2;
 Radius = .5;
-n_height = 12;
-cant = deg2rad(0);
-sweep = deg2rad(20);
-toe_out = deg2rad(-15);
+n_height = 20;
+cant = deg2rad(15);
+sweep = deg2rad(0);
+toe_out = deg2rad(5);
 up = 1; % 1 --> winglet verso l'alto
          % -1 --> winglet verso il basso
          
@@ -27,22 +27,20 @@ up = 1; % 1 --> winglet verso l'alto
 %% code
 Wing = build_wing(wing_root,wing_tip,wing_span,n_chord,n_span,naca,...
                                                     wing_sweep,wing_twist);
-% 
+
 % W_let = build_winglet(w_let_root,w_let_tip,height,Radius,n_chord,...
 %                     n_height,cant,sweep,toe_out,naca,Wing,wing_twist,up);
 %  Wing = assemble_wing(Wing,W_let); 
-%  Wing2 = Wing; Wing2(:,:,2) = - Wing(:,:,2);
-%  Wing = assemble_wing(Wing2(:,end:-1:1,:),Wing);                                                
+ Wing2 = Wing; Wing2(:,:,2) = - Wing(:,:,2);
+ Wing = assemble_wing(Wing2(:,end:-1:1,:),Wing);                                                
 
 [vortex,p_controllo] = collocazione(Wing);
 [N,T] = versori(Wing);
 
-V_inf = zeros(size(Wing,1)-1,size(Wing,2)-1,3);
-V_inf(:,:,1) = 10;
-V_inf(:,:,3) = 1;
-         
-%% plot ala
 
+         
+% %% plot ala
+% 
 % figure(100)
 % surf(Wing(:,:,1),Wing(:,:,2),Wing(:,:,3))
 % xlabel('chord')
@@ -59,11 +57,14 @@ V_inf(:,:,3) = 1;
 % tic
 % [At,bt] = influence(vortex,p_controllo,V_inf(1,1,:),N,1);
 % toc
-tic
+alpha = linspace(deg2rad(0),deg2rad(12),12);
+for i = 1:numel(alpha)
+V_inf = zeros(size(Wing,1)-1,size(Wing,2)-1,3);
+V_inf(:,:,1) = cos(alpha(i));
+V_inf(:,:,3) = sin(alpha(i));
 A = induced(vortex,1,p_controllo,V_inf(1,1,:),N);
-B = dot(V_inf,N,3)';
+B = -dot(V_inf,N,3)';
 b = B(:);
-toc
 %%
 gamma_ll = A\b;
 gamma_ll = reshape(gamma_ll,size(p_controllo,1),size(p_controllo,2));
@@ -75,7 +76,7 @@ gamma_ll = reshape(gamma_ll,size(p_controllo,1),size(p_controllo,2));
 % colorbar
 %
 tic
-V = induced(vortex,gamma_ll,Wing,V_inf(1,1,:),N);
+[V,coeffxcd] = induced(vortex,gamma_ll,p_controllo,V_inf(1,1,:),N);
 toc
 %%
 %cp = 1-(V(:,:,1)./sqrt(sum(V_inf.^2,3))).^2;
@@ -86,17 +87,40 @@ toc
 % ------------------------- = 2 * Gamma * dy / V_inf
 %  .5 * rho * V_inf.^2
 
-cp = -gamma_ll*2.*(sqrt(sum((Wing(1:end-1,2:end,:)-Wing(1:end-1,1:end-1,:)).^2,3)))./sqrt(sum(V_inf.^2,3));
-figure(400)
-surf(p_controllo(:,:,1),p_controllo(:,:,2),p_controllo(:,:,3),cp)
-axis equal
-shading interp
-colorbar
+cl = gamma_ll*2.*(Wing(1:end-1,2:end,2)-Wing(1:end-1,1:end-1,2))/(wing_root*(Wing(1,end,2)-Wing(1,1,2)));
 
-% andamento cp in corda alle varie sezioni in apertura
 
-figure(500)
-hold on
-for i = 1:size(gamma_ll,2)
-    plot3(p_controllo(:,i,1),p_controllo(:,i,2),cp(:,i))
+dl = Wing(1:end-1,2:end,:)-Wing(1:end-1,1:end-1,:);
+cf = gamma_ll.*cross(V_inf,dl)./(wing_root*(Wing(1,end,2)-Wing(1,1,2)));
+
+cd = coeffxcd.*(Wing(1:end-1,2:end,2)-Wing(1:end-1,1:end-1,2))/(wing_root*(Wing(1,end,2)-Wing(1,1,2)));
+
+cp2 = 1-(sqrt(sum(V.^2,3))./sqrt(sum(V_inf(1,1,:).^2,3))).^2;
+CL(i) = sum(sum(cf(:,:,3)));
+CD(i) = sum(sum(cd));
+
 end
+% figure(400)
+% subplot(2,1,1)
+% surf(p_controllo(:,:,1),p_controllo(:,:,2),p_controllo(:,:,3),cl)
+% axis equal
+% shading interp
+% colorbar
+% subplot(2,1,2)
+% surf(p_controllo(:,:,1),p_controllo(:,:,2),p_controllo(:,:,3),cp2)
+% axis equal
+% shading interp
+% colorbar
+% linkaxes
+% 
+% % andamento cp in corda alle varie sezioni in apertura
+% 
+% figure(500)
+% for i = 1:size(gamma_ll,2)
+%     subplot(1,2,1)
+%     plot3(p_controllo(:,i,1),p_controllo(:,i,2),cl(:,i))
+%     hold on
+%     subplot(1,2,2)
+%     hold on
+%     plot3(p_controllo(:,i,1),p_controllo(:,i,2),cp2(:,i))
+% end
