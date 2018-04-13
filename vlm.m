@@ -1,12 +1,12 @@
 %% ala
 clear all
 
-naca = 4412;
+naca = 0012;
 wing_root = 1;
 wing_tip = 1;
 wing_span = 5;
-n_chord = 5;
-n_span = 6;
+n_chord = 50;
+n_span = 50;
 wing_sweep = deg2rad(0);
 wing_twist = deg2rad(0);
 
@@ -60,8 +60,9 @@ alpha = deg2rad(5);linspace(deg2rad(0),deg2rad(12),12);
 for i = 1:numel(alpha)
 V_inf = zeros(size(Wing,1)-1,size(Wing,2)-1,3);
 V_inf(:,:,1) = cos(alpha(i));
-V_inf(:,:,3) = sin(alpha(i));
-A = induced(vortex,1,p_controllo,V_inf(1,1,:),N);
+V_inf(:,:,3) = sin(alpha(i));7
+dummy = NaN;
+A = induced(vortex,dummy,p_controllo,V_inf(1,1,:),N);
 B = -dot(V_inf,N,3)';
 b = B(:);
 %%
@@ -117,8 +118,8 @@ gamma_c(:,end+1) = gamma_ll(:,end); % numel(segmenti_riga) = numel(vortici_riga)
 % per ogni colonna il segmento j-esimo avra
 % intensità pari alla somma della sua gamma e della gamma del
 % segmento che lo precede
-for i = 2:size(gamma_ll,1)
-    gamma_c(i,:) = gamma_c(i,:)+gamma_c(i-1,:);
+for j = 2:size(gamma_ll,1)
+    gamma_c(i,:) = gamma_c(j,:)+gamma_c(j-1,:);
 end
 
 cfc = gamma_c.*cross(V_inf(1,1,:)+mid_chord_speed,-dchord,3)/(wing_root*(Wing(1,end,2)-Wing(1,1,2)));

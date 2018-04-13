@@ -1,6 +1,6 @@
 function VV = span_induced(vortex,gamma,point)
 % calcola la velocità indotta dai segmenti allineati all'apertura
-% dei vortici a staffa descritti dalla matrice 3d di punti vortex(m,n,3) 
+% dei vortici a staffa descritti dalla matrice 3d di punti vortex(m,n,3)
 % aventi intensità gamma nel punto point(1,1,3)
 % se gamma ha un solo elemento allora VV è la matrice che descrive
 % l'induzione di tutti i vortici in quel punto considerando intensità
@@ -9,7 +9,7 @@ function VV = span_induced(vortex,gamma,point)
 % punto scelto VV(1,1,3);
 
    % assegno il valore di gamma corrispondente al segmento
-    if numel(gamma ==1) % coefficienti d'influenza
+    if isnan(gamma) % coefficienti d'influenza
        gamma_c = ones(size(vortex,1)-1,size(vortex,2)-1);
     else % la gamma è gia quella data
         gamma_c = gamma;
@@ -27,12 +27,12 @@ function VV = span_induced(vortex,gamma,point)
 
     % costriusco il segmento
     line = [line_e,line_s];
-    
+
     % calcolo della velocità indotta dei segmenti
-    
+
     r1 = point-line(:,2,:);
     r2 = point-line(:,1,:);
-    
+
     %cerco h == 0 per imporre poi velocità nulla
     [riga1,colonna1] = find(sqrt(sum(r1.^2,3))==0);
     [riga2,colonna2] = find(sqrt(sum(r2.^2,3))==0);
@@ -46,7 +46,7 @@ function VV = span_induced(vortex,gamma,point)
     % deriva dall'aggiunta a denominatore di un termine(raggio del core
     % viscoso) che serve per "simulare" l'effetto del core allontanado il
     % punto in modo artificiale
-    
+
     k = 0; %parametro modificabile
     % sviluppato analiticamente per ottenere una forma di più facile
     % implementazione numerica
@@ -57,30 +57,30 @@ function VV = span_induced(vortex,gamma,point)
                     sqrt(sum(cross(r1,r2,3).^2,3));
 
         corr = 1 + corr1 + corr2;
-    else 
+    else
         corr = 1;
     end
-    
+
     V = gamma_c/(4*pi).*num./(den.*corr);
-    
+
     % assegno nulle le velocità dove h=0
     if ~isempty(riga1)
         V(riga1,colonna1,:) = zeros(size(riga1,1),size(colonna1,1),3);
     end
     if ~isempty(riga2)
         V(riga2,colonna2,:) = zeros(size(riga2,1),size(colonna2,1),3);
-    end   
+    end
     if ~isempty(riga3)
         V(riga3,colonna3,:) = zeros(size(riga3,1),size(colonna3,1),3);
-    end 
-    
-    
+    end
+
+
     if numel(gamma)==1%costruisco la matrice dei coefficienti d'induzione
                        % 3D
        VV = reshape(V,size(vortex,1)-1,size(vortex,2)-1,3);
-    
+
     else % restituisco la velocità indotta dai segmenti chordwise
-    
+
        VV = sum(V,1);
     end
 end
